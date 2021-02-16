@@ -1,35 +1,35 @@
 <template>
-  <div>
-    <h3>{{ dataClub.name }}</h3>
-
+  <div style="margin: 20px">
     <table>
-      <thead>
+      <thead style="text-align: left">
         <tr>
+          <th>No.</th>
           <th style="width: 300px">สโมสร</th>
-          <th>แข่ง</th>
-          <th>ชนะ</th>
-          <th>เสมอ</th>
-          <th>แพ้</th>
-          <th>ได้</th>
-          <th>เสีย</th>
-          <th>ต่าง</th>
-          <th>แต้ม</th>
+          <th style="width: 50px">แข่ง</th>
+          <th style="width: 50px">ชนะ</th>
+          <th style="width: 50px">เสมอ</th>
+          <th style="width: 50px">แพ้</th>
+          <th style="width: 50px">ได้</th>
+          <th style="width: 50px">เสีย</th>
+          <th style="width: 50px">ต่าง</th>
+          <th style="width: 50px">แต้ม</th>
           <th>5 เกมส์ล่าสุด</th>
         </tr>
       </thead>
 
-      <tbody v-for="(item, index) in dataClub.clubs" :key="index" >
+      <tbody v-for="(item, index) in fanClubs" :key="index" >
         <tr>
+          <td>{{ index + 1 }}</td>
           <td>{{ item.name }}</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
+          <td>{{ item.games }}</td>
+          <td>{{ item.win }}</td>
+          <td>{{ item.draw }}</td>
+          <td>{{ item.lose }}</td>
+          <td>{{ item.gf }}</td>
+          <td>{{ item.ga }}</td>
+          <td>{{ item.gd }}</td>
+          <td>{{ item.point }}</td>
+          <td>{{ item.history.slice(-5).reverse() }}</td>
         </tr>
       </tbody>
     </table>
@@ -42,7 +42,7 @@ import { mapState } from 'vuex'
 export default {
   computed: {
     ...mapState({
-      dataClub: state => state.dataClub
+      fanClubs: state => state.fanClubs
     })
 
   },
@@ -56,4 +56,19 @@ export default {
 </script>
 
 <style scoped>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tbody > tr:nth-child(even) {
+  background-color: #dddddd;
+}
 </style>
