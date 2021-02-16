@@ -5,7 +5,8 @@ import _ from "lodash"
 const store = () => {
   return new Vuex.Store({
     state: {
-      dataMatch: {},
+      fetchData: {},
+      allMatches: [],
       fanClubs: []
     },
     mutations: {
@@ -16,8 +17,8 @@ const store = () => {
     actions: {
       async init({dispatch}) {
         await dispatch('fetchMatchData')
-        dispatch('competition')
-
+        dispatch('allCompetition')
+        dispatch('calculateMatches')
       },
       fetchMatchData(context) {
         const p = new Promise(async (resolve) => {
@@ -27,20 +28,17 @@ const store = () => {
           )
 
           if(response.status == 200) {
-            commit('setState', { key: 'dataMatch', payload: response.data.rounds})
+            commit('setState', { key: 'fetchData', payload: response.data.rounds})
             resolve()
           }
         })
-        
         return p
       },
-
-      competition(context) {
-        const { state, commit , dispatch } = context
-
+      allCompetition(context) {
+        const { state, commit } = context
         let allMatches = []
 
-        state.dataMatch.forEach(item => {
+        state.fetchData.forEach(item => {
           const matches = item.matches
           allMatches.push(...matches)
         });
@@ -48,78 +46,40 @@ const store = () => {
         const sortedDate = allMatches.sort((a, b) => {
           const dateA = a.date.replace('-', '')
           const dateB = b.date.replace('-', '')
-
           return dateA.localeCompare(dateB)
         })
 
+        commit('setState', { key: 'allMatches', payload: sortedDate })
+      },
+      calculateMatches(context) {
+        const { state, commit } = context
 
-        console.log("allMatches ===>",allMatches)
-        console.log("sortedDate ====>", sortedDate)
-
-        const mockData = [{
-          name: 'xxxx',
-          games: 10,
-          win: 12,
-          draw: 3,
-          lose: 2,
-          gf: 45,
-          ga: 8,
-          gd: 37,
-          point: 89,
-          history: ['win', 'lose', 'win']
-        }]
-
-
-        sortedDate.forEach(match => {
-          // console.log(match.date)
+        state.allMatches.forEach(match => {
           const team1 = match.team1
           const team2 = match.team2
           const team1_score = match.score.ft[0]
           const team2_score = match.score.ft[1]
 
           if(state.fanClubs.find(fc => fc.name == team1) == null) {
-            const newFanClub = {
-              name: team1,
-              games: 0,
-              win: 0,
-              draw: 0,
-              lose: 0,
-              gf: 0,
-              ga: 0,
-              gd: 0,
-              point: 0,
-              history: []
-            }
-
-            commit('setState', { key: 'fanClubs', payload: [...state.fanClubs, newFanClub]})
+            const newClubData = checkClub(team1)
+            commit('setState', { key: 'fanClubs', payload: [...state.fanClubs, newClubData]})
           }
 
           if(state.fanClubs.find(fc => fc.name == team2) == null) {
-            const newFanClub = {
-              name: team2,
-              games: 0,
-              win: 0,
-              draw: 0,
-              lose: 0,
-              gf: 0,
-              ga: 0,
-              gd: 0,
-              point: 0,
-              history: []
-            }
-
-            commit('setState', { key: 'fanClubs', payload: [...state.fanClubs, newFanClub]})
+            const newClubData = checkClub(team2)
+            commit('setState', { key: 'fanClubs', payload: [...state.fanClubs, newClubData]})
           }
 
+          const team1_data = state.fanClubs.find(fc => fc.name == team1)
+          const gf_team1 = team1_data.gf + team1_score
+          const ga_team1 = team1_data.ga + team2_score
+
+          const team2_data = state.fanClubs.find(fc => fc.name == team2)
+          const gf_team2 = team2_data.gf + team2_score
+          const ga_team2 = team2_data.ga + team1_score
+
+
           if(team1_score > team2_score) {
-            const team1_data = state.fanClubs.find(fc => fc.name == team1)
-            const gf_team1 = team1_data.gf + team1_score
-            const ga_team1 = team1_data.ga + team2_score
-
-            const team2_data = state.fanClubs.find(fc => fc.name == team2)
-            const gf_team2 = team2_data.gf + team2_score
-            const ga_team2 = team2_data.ga + team1_score
-
             const new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
@@ -146,19 +106,10 @@ const store = () => {
               history: [...team2_data.history, 'LOSE']
             }
 
-
             const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
             commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
 
           } else if (team1_score == team2_score){
-            const team1_data = state.fanClubs.find(fc => fc.name == team1)
-            const gf_team1 = team1_data.gf + team1_score
-            const ga_team1 = team1_data.ga + team2_score
-
-            const team2_data = state.fanClubs.find(fc => fc.name == team2)
-            const gf_team2 = team2_data.gf + team2_score
-            const ga_team2 = team2_data.ga + team1_score
-
             const new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
@@ -185,22 +136,10 @@ const store = () => {
               history: [...team2_data.history, 'DRAW']
             }
 
-
-
             const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
             commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
 
-
           } else {
-
-            const team1_data = state.fanClubs.find(fc => fc.name == team1)
-            const gf_team1 = team1_data.gf + team1_score
-            const ga_team1 = team1_data.ga + team2_score
-
-            const team2_data = state.fanClubs.find(fc => fc.name == team2)
-            const gf_team2 = team2_data.gf + team2_score
-            const ga_team2 = team2_data.ga + team1_score
-
             const new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
@@ -235,16 +174,122 @@ const store = () => {
 
         const sorted = state.fanClubs.sort((a, b) => b.point - a.point)
         commit('setState', { key: 'fanClubs', payload: sorted})
-
-        console.log(state.fanClubs)
-
-
-
-
-
       },
     },
   })
 }
 
 export default store
+
+function checkClub(teamName) {
+  const newFanClub = {
+    name: teamName,
+    games: 0,
+    win: 0,
+    draw: 0,
+    lose: 0,
+    gf: 0,
+    ga: 0,
+    gd: 0,
+    point: 0,
+    history: []
+  }
+
+  return newFanClub
+  
+}
+
+// function calClubData(club_a, club_b) {
+
+//   console.log(club_a)
+//   console.log(club_b)
+
+//   let new_team1_data = {}
+//   let new_team2_data = {}
+
+//   if(club_a.team1_score > club_b.team2_score) {
+//     new_team1_data = {
+//       name: club_a.team1,
+//       games: club_a.team1_data.games + 1,
+//       win: club_a.team1_data.win + 1,
+//       draw: club_a.team1_data.draw ,
+//       lose: club_a.team1_data.lose,
+//       gf: club_a.gf_team1,
+//       ga: club_a.ga_team1,
+//       gd: club_a.gf_team1 - club_a.ga_team1,
+//       point: club_a.team1_data.point + 3,
+//       history: [...club_a.team1_data.history, 'WIN']
+//     }
+
+//     new_team2_data = {
+//       name: club_b.team2,
+//       games: club_b.team2_data.games + 1,
+//       win: club_b.team2_data.win,
+//       draw: club_b.team2_data.draw ,
+//       lose: club_b.team2_data.lose + 1,
+//       gf: club_b.gf_team2,
+//       ga: club_b.ga_team2,
+//       gd: club_b.gf_team2 - club_b.ga_team2,
+//       point: club_b.team2_data.point,
+//       history: [...club_b.team2_data.history, 'LOSE']
+//     }
+//   } else if (club_a.team1_score == club_b.team2_score){
+//     new_team1_data = {
+//       name: club_a.team1,
+//       games: club_a.team1_data.games + 1,
+//       win: club_a.team1_data.win,
+//       draw: club_a.team1_data.draw + 1,
+//       lose: club_a.team1_data.lose,
+//       gf: club_a.gf_team1,
+//       ga: club_a.ga_team1,
+//       gd: club_a.gf_team1 - club_a.ga_team1,
+//       point: club_a.team1_data.point + 1,
+//       history: [...club_a.team1_data.history, 'DRAW']
+//     }
+
+//     new_team2_data = {
+//       name: club_b.team2,
+//       games: club_b.team2_data.games + 1,
+//       win: club_b.team2_data.win,
+//       draw: club_b.team2_data.draw + 1,
+//       lose: club_b.team2_data.lose,
+//       gf: club_b.gf_team2,
+//       ga: club_b.ga_team2,
+//       gd: club_b.gf_team2 - club_b.ga_team2,
+//       point: club_b.team2_data.point + 1,
+//       history: [...club_b.team2_data.history, 'DRAW']
+//     }
+//   } else {
+//     new_team1_data = {
+//       name: club_a.team1,
+//       games: club_a.team1_data.games + 1,
+//       win: club_a.team1_data.win,
+//       draw: club_a.team1_data.draw,
+//       lose: club_a.team1_data.lose + 1,
+//       gf: club_a.gf_team1,
+//       ga: club_a.ga_team1,
+//       gd: club_a.gf_team1 - club_a.ga_team1,
+//       point: club_a.team1_data.point,
+//       history: [...club_a.team1_data.history, 'LOSE']
+//     }
+
+//     new_team2_data = {
+//       name: club_b.team2,
+//       games: club_b.team2_data.games + 1,
+//       win: club_b.team2_data.win + 1,
+//       draw: club_b.team2_data.draw,
+//       lose: club_b.team2_data.lose,
+//       gf: club_b.gf_team2,
+//       ga: club_b.ga_team2,
+//       gd: club_b.gf_team2 - club_b.ga_team2,
+//       point: club_b.team2_data.point + 3,
+//       history: [...club_b.team2_data.history, 'WIN']
+//     }
+//   }
+
+//   return {
+//     new_team1_data, 
+//     new_team2_data
+//   }
+
+// }

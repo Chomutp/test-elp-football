@@ -29,7 +29,7 @@
           <td>{{ item.ga }}</td>
           <td>{{ item.gd }}</td>
           <td>{{ item.point }}</td>
-          <td>{{ item.history.slice(-5).reverse() }}</td>
+          <td>{{ item.history | historyClub}}</td>
         </tr>
       </tbody>
     </table>
@@ -44,14 +44,15 @@ export default {
     ...mapState({
       fanClubs: state => state.fanClubs
     })
-
+  },
+  filters: {
+    historyClub(val) {
+      return val.slice(-5).reverse()
+    }
   },
   mounted() {
     this.$store.dispatch('init')
   },
-
-
-
 }
 </script>
 
