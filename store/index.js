@@ -78,87 +78,31 @@ const store = () => {
           const gf_team2 = team2_data.gf + team2_score
           const ga_team2 = team2_data.ga + team1_score
 
-          let new_team1_data = {}
-          let new_team2_data = {}
 
-          if(team1_score > team2_score) {
-            new_team1_data = {
-              name: team1,
-              games: team1_data.games + 1,
-              win: team1_data.win + 1,
-              draw: team1_data.draw ,
-              lose: team1_data.lose,
-              gf: gf_team1,
-              ga: ga_team1,
-              gd: gf_team1 - ga_team1,
-              point: team1_data.point + 3,
-              history: [...team1_data.history, 'WIN']
-            }
+          const new_team1_data = {
+            name: team1,
+            games: team1_data.games + 1,
+            win: team1_score > team2_score ? team1_data.win + 1 : team1_data.win ,
+            draw: team1_score == team2_score ? team1_data.draw + 1 : team1_data.draw,
+            lose: team1_score < team2_score ? team1_data.lose + 1 : team1_data.lose,
+            gf: gf_team1,
+            ga: ga_team1,
+            gd: gf_team1 - ga_team1,
+            point: team1_score > team2_score ? team1_data.point + 3 : team1_score == team2_score ? team1_data.point + 1 : team1_data.point,
+            history: team1_score > team2_score ? [...team1_data.history, 'WIN'] : team1_score == team2_score ? [...team1_data.history, 'DRAW'] : [...team1_data.history, 'LOSE']
+          }
 
-            new_team2_data = {
-              name: team2,
-              games: team2_data.games + 1,
-              win: team2_data.win,
-              draw: team2_data.draw ,
-              lose: team2_data.lose + 1,
-              gf: gf_team2,
-              ga: ga_team2,
-              gd: gf_team2 - ga_team2,
-              point: team2_data.point,
-              history: [...team2_data.history, 'LOSE']
-            }
-          } else if (team1_score == team2_score){
-            new_team1_data = {
-              name: team1,
-              games: team1_data.games + 1,
-              win: team1_data.win,
-              draw: team1_data.draw + 1,
-              lose: team1_data.lose,
-              gf: gf_team1,
-              ga: ga_team1,
-              gd: gf_team1 - ga_team1,
-              point: team1_data.point + 1,
-              history: [...team1_data.history, 'DRAW']
-            }
-
-            new_team2_data = {
-              name: team2,
-              games: team2_data.games + 1,
-              win: team2_data.win,
-              draw: team2_data.draw + 1,
-              lose: team2_data.lose,
-              gf: gf_team2,
-              ga: ga_team2,
-              gd: gf_team2 - ga_team2,
-              point: team2_data.point + 1,
-              history: [...team2_data.history, 'DRAW']
-            }
-          } else {
-            new_team1_data = {
-              name: team1,
-              games: team1_data.games + 1,
-              win: team1_data.win,
-              draw: team1_data.draw,
-              lose: team1_data.lose + 1,
-              gf: gf_team1,
-              ga: ga_team1,
-              gd: gf_team1 - ga_team1,
-              point: team1_data.point,
-              history: [...team1_data.history, 'LOSE']
-            }
-
-            new_team2_data = {
-              name: team2,
-              games: team2_data.games + 1,
-              win: team2_data.win + 1,
-              draw: team2_data.draw,
-              lose: team2_data.lose,
-              gf: gf_team2,
-              ga: ga_team2,
-              gd: gf_team2 - ga_team2,
-              point: team2_data.point + 3,
-              history: [...team2_data.history, 'WIN']
-            }
+          const new_team2_data = {
+            name: team2,
+            games: team2_data.games + 1,
+            win: team1_score < team2_score ? team2_data.win + 1 : team2_data.win,
+            draw: team1_score == team2_score ? team2_data.draw + 1 : team2_data.draw,
+            lose: team1_score > team2_score ? team2_data.lose + 1 : team2_data.lose,
+            gf: gf_team2,
+            ga: ga_team2,
+            gd: gf_team2 - ga_team2,
+            point: team1_score < team2_score ? team2_data.point + 3 : team1_score == team2_score ? team2_data.point + 1 : team2_data.point,
+            history: team1_score < team2_score ? [...team2_data.history, 'WIN'] : team1_score == team2_score ? [...team2_data.history, 'DRAW'] : [...team2_data.history, 'LOSE']
           }
 
           const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
@@ -190,5 +134,11 @@ function checkClub(teamName) {
   }
 
   return newFanClub
+  
+}
+
+
+
+function calMatchScore(params) {
   
 }
