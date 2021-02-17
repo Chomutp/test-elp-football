@@ -78,9 +78,11 @@ const store = () => {
           const gf_team2 = team2_data.gf + team2_score
           const ga_team2 = team2_data.ga + team1_score
 
+          let new_team1_data = {}
+          let new_team2_data = {}
 
           if(team1_score > team2_score) {
-            const new_team1_data = {
+            new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
               win: team1_data.win + 1,
@@ -93,7 +95,7 @@ const store = () => {
               history: [...team1_data.history, 'WIN']
             }
 
-            const new_team2_data = {
+            new_team2_data = {
               name: team2,
               games: team2_data.games + 1,
               win: team2_data.win,
@@ -105,12 +107,8 @@ const store = () => {
               point: team2_data.point,
               history: [...team2_data.history, 'LOSE']
             }
-
-            const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
-            commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
-
           } else if (team1_score == team2_score){
-            const new_team1_data = {
+            new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
               win: team1_data.win,
@@ -123,7 +121,7 @@ const store = () => {
               history: [...team1_data.history, 'DRAW']
             }
 
-            const new_team2_data = {
+            new_team2_data = {
               name: team2,
               games: team2_data.games + 1,
               win: team2_data.win,
@@ -135,12 +133,8 @@ const store = () => {
               point: team2_data.point + 1,
               history: [...team2_data.history, 'DRAW']
             }
-
-            const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
-            commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
-
           } else {
-            const new_team1_data = {
+            new_team1_data = {
               name: team1,
               games: team1_data.games + 1,
               win: team1_data.win,
@@ -153,7 +147,7 @@ const store = () => {
               history: [...team1_data.history, 'LOSE']
             }
 
-            const new_team2_data = {
+            new_team2_data = {
               name: team2,
               games: team2_data.games + 1,
               win: team2_data.win + 1,
@@ -165,11 +159,11 @@ const store = () => {
               point: team2_data.point + 3,
               history: [...team2_data.history, 'WIN']
             }
-
-            const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
-            commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
-
           }
+
+          const filtered= state.fanClubs.filter(fc => fc.name !== team1 && fc.name !== team2)
+          commit('setState', { key: 'fanClubs', payload: [...filtered, new_team1_data, new_team2_data]})
+
         })
 
         const sorted = state.fanClubs.sort((a, b) => b.point - a.point)
@@ -198,98 +192,3 @@ function checkClub(teamName) {
   return newFanClub
   
 }
-
-// function calClubData(club_a, club_b) {
-
-//   console.log(club_a)
-//   console.log(club_b)
-
-//   let new_team1_data = {}
-//   let new_team2_data = {}
-
-//   if(club_a.team1_score > club_b.team2_score) {
-//     new_team1_data = {
-//       name: club_a.team1,
-//       games: club_a.team1_data.games + 1,
-//       win: club_a.team1_data.win + 1,
-//       draw: club_a.team1_data.draw ,
-//       lose: club_a.team1_data.lose,
-//       gf: club_a.gf_team1,
-//       ga: club_a.ga_team1,
-//       gd: club_a.gf_team1 - club_a.ga_team1,
-//       point: club_a.team1_data.point + 3,
-//       history: [...club_a.team1_data.history, 'WIN']
-//     }
-
-//     new_team2_data = {
-//       name: club_b.team2,
-//       games: club_b.team2_data.games + 1,
-//       win: club_b.team2_data.win,
-//       draw: club_b.team2_data.draw ,
-//       lose: club_b.team2_data.lose + 1,
-//       gf: club_b.gf_team2,
-//       ga: club_b.ga_team2,
-//       gd: club_b.gf_team2 - club_b.ga_team2,
-//       point: club_b.team2_data.point,
-//       history: [...club_b.team2_data.history, 'LOSE']
-//     }
-//   } else if (club_a.team1_score == club_b.team2_score){
-//     new_team1_data = {
-//       name: club_a.team1,
-//       games: club_a.team1_data.games + 1,
-//       win: club_a.team1_data.win,
-//       draw: club_a.team1_data.draw + 1,
-//       lose: club_a.team1_data.lose,
-//       gf: club_a.gf_team1,
-//       ga: club_a.ga_team1,
-//       gd: club_a.gf_team1 - club_a.ga_team1,
-//       point: club_a.team1_data.point + 1,
-//       history: [...club_a.team1_data.history, 'DRAW']
-//     }
-
-//     new_team2_data = {
-//       name: club_b.team2,
-//       games: club_b.team2_data.games + 1,
-//       win: club_b.team2_data.win,
-//       draw: club_b.team2_data.draw + 1,
-//       lose: club_b.team2_data.lose,
-//       gf: club_b.gf_team2,
-//       ga: club_b.ga_team2,
-//       gd: club_b.gf_team2 - club_b.ga_team2,
-//       point: club_b.team2_data.point + 1,
-//       history: [...club_b.team2_data.history, 'DRAW']
-//     }
-//   } else {
-//     new_team1_data = {
-//       name: club_a.team1,
-//       games: club_a.team1_data.games + 1,
-//       win: club_a.team1_data.win,
-//       draw: club_a.team1_data.draw,
-//       lose: club_a.team1_data.lose + 1,
-//       gf: club_a.gf_team1,
-//       ga: club_a.ga_team1,
-//       gd: club_a.gf_team1 - club_a.ga_team1,
-//       point: club_a.team1_data.point,
-//       history: [...club_a.team1_data.history, 'LOSE']
-//     }
-
-//     new_team2_data = {
-//       name: club_b.team2,
-//       games: club_b.team2_data.games + 1,
-//       win: club_b.team2_data.win + 1,
-//       draw: club_b.team2_data.draw,
-//       lose: club_b.team2_data.lose,
-//       gf: club_b.gf_team2,
-//       ga: club_b.ga_team2,
-//       gd: club_b.gf_team2 - club_b.ga_team2,
-//       point: club_b.team2_data.point + 3,
-//       history: [...club_b.team2_data.history, 'WIN']
-//     }
-//   }
-
-//   return {
-//     new_team1_data, 
-//     new_team2_data
-//   }
-
-// }
